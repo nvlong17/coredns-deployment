@@ -2,6 +2,7 @@
 NAME=$"coredns"
 BACKUPPATH=$"/home/coredns"
 CONFPATH=$"/etc/coredns"
+VENV=$"/home/coredns/venv"
 SCRIPTPATH=$""
 echo "-------------------------------------"
 echo "Corefile Update Script - by nvlong17"
@@ -15,8 +16,10 @@ sleep 5
 find $BACKUPPATH/backup/$NAME* -mtime +5 -exec rm {} \;
 sleep 3
 #Execute update script
+source ${VENV}/bin/activate
 python3 "${SCRIPTPATH}"/Main.py 2
 sleep 2
+deactivate
 #Restart CoreDNS
 echo "Restarting CoreDNS service"
 sleep 2

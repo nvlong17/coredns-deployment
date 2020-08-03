@@ -55,6 +55,7 @@ USR_BIN="/usr/bin"
 COREDNS_ETC="/etc/coredns"
 RSYSLOG_CONF="/etc/rsyslog.conf"
 RSYSLOG_D="/etc/rsyslog.d"
+VENV="/home/coredns/venv"
 
 #### Messages ####
 
@@ -64,6 +65,11 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 #### Installation ####
+# Setup virtualenv
+setup_venv() {
+    python3 -m venv ${VENV}
+}
+
 # Install requied Python libs
 install_py_libs() {
     pip3 install -r --user requirements.txt
@@ -111,7 +117,7 @@ update_db() {
     sed -i 's,DATABASE_USERNAME=\"root\",DATABASE_USERNAME=\"addomain\",g' ${COREDNS_HOME}/db_script/Main.py
     sed -i 's,DB_USER_PASSWORD=\"password\",DB_USER_PASSWORD="'"${SQL_CLIENT_PASS}"'",g' ${COREDNS_HOME}/db_script/Main.py
     cd ${COREDNS_HOME}/db_script && python3 Main.py && cd
-    (crontab -l && echo "0 */4 * * * cd ${COREDNS_HOME}/db_script && python3 Main.py && cd") | crontab -
+    (crontab -l && echo "0 */4 * * * cd ${VENV} && source ./bin/activate && cd ${COREDNS_HOME}/db_script && python3 Main.py && deactivate && cd") | crontab -
 }
 
 # Install Golang
@@ -211,7 +217,6 @@ EOFSINKHOLE
 
 #################################################################################################
 
-install_py_libs
 disable_systemd_resolved
 setup_network_manager
 install_mysql
@@ -220,6 +225,8 @@ update_db
 install_go
 install_coredns
 make_script_conf
+install_py_libs
+setup_venv
 init_corefile
 update_corefile
 setup_logging
