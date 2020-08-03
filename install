@@ -91,15 +91,15 @@ check_os() {
     fi
 }
 
-get_script() {
-    if [[ -f ../coredns-deployment && -f ./deploy ]]; then
-        echo "Scripts exists. Starting install process..."
-    else
-        echo "Downloading scripts for deployment..."
-        git clone "${SCRIPT_REPO}"
-        cd coredns-deployment
-    fi
-}
+#get_script() {
+#    if [[ -f ../coredns-deployment && -f ./deploy ]]; then
+#        echo "Scripts exists. Starting install process..."
+#    else
+#        echo "Downloading scripts for deployment..."
+#        git clone "${SCRIPT_REPO}"
+#        cd coredns-deployment
+#    fi
+#}
 
 # Check conditions before install
 check_before_install() {
@@ -144,6 +144,6 @@ prepare_install() {
 welcome
 check_before_install
 prepare_install
-get_script
+#get_script
 chmod +x deploy
 ./deploy
