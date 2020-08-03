@@ -120,7 +120,7 @@ remove_old_service() {
 # Install required packages
 install_required_packages() {
     yum -y update
-    yum -y install git curl wget vim python3 sed rsyslog cronie make python3-pip rsyslog-mmjsonparse
+    yum -y install git curl wget vim python3 sed rsyslog cronie make python3-pip rsyslog-mmjsonparse expect
     systemctl start rsyslog
     systemctl enable rsyslog
 }
