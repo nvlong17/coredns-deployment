@@ -92,6 +92,8 @@ setup_network_manager() {
 # Install MySQL
 install_mysql() {
     yum install -y mysql-server
+    systemctl start mysqld
+    systemctl enable mysqld
     echo "Seting up MySQL Server with mysql_secure_installation"
     echo "MySQL root password (store somewhere safe): ${MYSQL_PASSWORD}"
     mysql -u root <<_EOF_
