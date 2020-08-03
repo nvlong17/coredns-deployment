@@ -104,10 +104,10 @@ get_script() {
 # Check conditions before install
 check_before_install() {
     echo ""
-    check_os()
-    check_root()
-    check_min_ram()
-    check_coredns()
+    check_os
+    check_root
+    check_min_ram
+    check_coredns
 }
 
 #### Installation preparation ####
