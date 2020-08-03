@@ -29,6 +29,10 @@ welcome() {
     sleep 3
 }
 
+#### Server Information ####
+RAM_TOTAL=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
+MIN_RAM='524288'
+
 #### Directories ####
 COREFILE_DIR="/etc/coredns"
 COREDNS_BIN="/usr/bin/coredns"
