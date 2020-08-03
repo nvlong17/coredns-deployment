@@ -97,7 +97,7 @@ install_mysql() {
     echo "Seting up MySQL Server with mysql_secure_installation"
     echo "MySQL root password (store somewhere safe): ${MYSQL_PASSWORD}"
     mysql -u root <<_EOF_
-  UPDATE mysql.user SET Password=PASSWORD('${MYSQL_PASSWORD}') WHERE User='root';
+  UPDATE mysql.user SET authentication_string=PASSWORD('${MYSQL_PASSWORD}') WHERE User='root' AND Host = 'localhost';
   DELETE FROM mysql.user WHERE User='';
   DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
   DROP DATABASE IF EXISTS test;
