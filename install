@@ -92,7 +92,7 @@ check_os() {
 }
 
 get_script() {
-    if [[ -f ../coredns-deployment ] && [ -f ./deploy ]]; then
+    if [[ -f ../coredns-deployment && -f ./deploy ]]; then
         echo "Scripts exists. Starting install process..."
     else
         echo "Downloading scripts for deployment..."
