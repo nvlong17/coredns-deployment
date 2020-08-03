@@ -92,7 +92,8 @@ check_os() {
 }
 
 get_script() {
-    if [[ -f ../coredns-deployment ]]; then
+    if [[ -f ../coredns-deployment ] && [ -f deploy ]]; then
+        echo "Scripts exists. Starting install process..."
     else
         echo "Downloading scripts for deployment..."
         git clone "${SCRIPT_REPO}"
