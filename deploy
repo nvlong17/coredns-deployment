@@ -66,7 +66,7 @@ NC='\033[0m'
 #### Installation ####
 # Install requied Python libs
 install_py_libs() {
-    pip3 install -r requirements.txt
+    pip3 install -r --user requirements.txt
 }
 
 # Disable systemd-resolved
@@ -94,7 +94,7 @@ install_mysql() {
   DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
   DROP DATABASE IF EXISTS test;
   DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
-  CREATE DATABASE `DomainServer`;
+  CREATE DATABASE DomainServer;
   FLUSH PRIVILEGES;
 _EOF_
 }

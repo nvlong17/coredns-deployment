@@ -113,7 +113,7 @@ check_before_install() {
 #### Installation preparation ####
 # Remove old services
 remove_old_service() {
-    yum -y remove mysql-server rsyslog python3
+    yum -y remove mysql-server rsyslog
     yum clean all
 }
 
