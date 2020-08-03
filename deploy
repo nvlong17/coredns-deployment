@@ -1,0 +1,226 @@
+#!/bin/bash
+set -e
+set -o errexit
+set -o nounset
+
+#### Server Information ####
+OS="$(uname -s)"
+ARCH="$(uname -m)"
+SCRIPT_REPO="https://github.com/nvlong17/coredns-deployment"
+GOLANG_VERSION="1.14.6"
+RAM_TOTAL=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
+MIN_RAM='524288'
+
+case $OS in
+    "Linux")
+        case $ARCH in
+        "x86_64")
+            ARCH=amd64
+            ;;
+        "aarch64")
+            ARCH=arm64
+            ;;
+        "armv6")
+            ARCH=armv6l
+            ;;
+        "armv8")
+            ARCH=arm64
+            ;;
+        .*386.*)
+            ARCH=386
+            ;;
+        esac
+        PLATFORM="linux-$ARCH"
+    ;;
+    "Darwin")
+        PLATFORM="darwin-amd64"
+    ;;
+esac
+
+#### Variables ####
+GO_PACKAGE="go$GOLANG_VERSION.$PLATFORM.tar.gz"
+MYSQL_PASSWORD=$(head -n 4096 /dev/urandom | tr -dc a-zA-Z0-9 | cut -b 1-20)
+SQL_CLIENT_PASS=$(head -n 4096 /dev/urandom | tr -dc a-zA-Z0-9 | cut -b 1-20)
+
+#### Directories ####
+RESOLV="/etc/resolv.conf"
+NETWORK_MAN_CONF="/etc/NetworkManager/NetworkManager.conf"
+SYSTEMD="/etc/systemd/system"
+SYSUSERS="/usr/lib/sysusers.d"
+TMPFILES="/usr/lib/tmpfiles.d"
+COREDNS_LOG="/var/log/coredns"
+SINKHOLE_CONF="/var/sinkhole/sinkhole.conf"
+COREDNS_HOME="/home/coredns"
+USR_BIN="/usr/bin"
+COREDNS_ETC="/etc/coredns"
+RSYSLOG_CONF="/etc/rsyslog.conf"
+RSYSLOG_D="/etc/rsyslog.d"
+
+#### Messages ####
+
+
+#### Text Coloring ####
+RED='\033[0;31m'
+NC='\033[0m'
+
+#### Installation ####
+# Install requied Python libs
+install_py_libs() {
+    pip3 install -r requirements.txt
+}
+
+# Disable systemd-resolved
+disable_systemd_resolved() {
+    systemctl stop systemd-resolved.service
+    systemctl disable systemd-resolved.service
+}
+
+# Setup NetworkManager DNS Nameserver for resolv.conf
+setup_network_manager() {
+    echo "Setting up DNS Nameserver"
+    sed -ie '/^\[main\]/a dns=none' "${NETWORK_MAN_CONF}"
+    sed -nie 'H;${x;s/^\n//;s/nameserver .*$/nameserver 8.8.8.8\n&/;p;}' ${RESOLV}
+    systemctl restart NetworkManager
+}
+
+# Install MySQL
+install_mysql() {
+    yum install -y mysql-server
+    echo "Seting up MySQL Server with mysql_secure_installation"
+    echo "MySQL root password (store somewhere safe): ${MYSQL_PASSWORD}"
+    mysql -u root <<_EOF_
+  UPDATE mysql.user SET Password=PASSWORD('${MYSQL_PASSWORD}') WHERE User='root';
+  DELETE FROM mysql.user WHERE User='';
+  DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+  DROP DATABASE IF EXISTS test;
+  DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+  CREATE DATABASE `DomainServer`;
+  FLUSH PRIVILEGES;
+_EOF_
+}
+
+# DB initialization
+init_db() {
+    sed -i 's/password/${SQL_CLIENT_PASS}/g' database/DomainServer.sql
+    mysql -u root -p${MYSQL_PASSWORD} DomainServer < database/DomainServer.sql
+}
+
+# Implement DB update (crontab, etc.)
+update_db() {
+    cp -r -v db_script ${COREDNS_HOME}
+    sed -i 's,DATABASE_USERNAME=\"root\",DATABASE_USERNAME=\"addomain\",g' ${COREDNS_HOME}/db_script/Main.py
+    sed -i 's,DB_USER_PASSWORD=\"password\",DB_USER_PASSWORD="'"${SQL_CLIENT_PASS}"'",g' ${COREDNS_HOME}/db_script/Main.py
+    cd ${COREDNS_HOME}/db_script && python3 Main.py && cd
+    (crontab -l && echo "0 */4 * * * cd ${COREDNS_HOME}/db_script && python3 Main.py && cd") | crontab -
+}
+
+# Install Golang
+install_go() {
+    echo "Downloading $GO_PACKAGE from https://golang.org/dl/$GO_PACKAGE"
+    wget https://golang.org/dl/$GO_PACKAGE
+    tar -C /usr/local -xzf $GO_PACKAGE
+    export PATH=$PATH:/usr/local/go/bin
+}
+
+# Install CoreDNS as a service
+install_coredns() {
+    echo "Downloading CoreDNS source code"
+    git clone https://github.com/coredns/coredns
+    echo "Compiling CoreDNS binaries"
+    cd coredns
+    make
+    cp -v coredns ${USR_BIN}
+    cd ..
+    cp -r -v zones ${COREDNS_ETC}
+    cd systemd
+    cp -v coredns.service ${SYSTEMD}
+    cp -v coredns-sysusers.conf ${SYSUSERS}
+    cp -v coredns-tmpfiles.conf ${TMPFILES}
+    cd ..
+    systemctl status coredns
+    systemctl start coredns
+    systemctl enable coredns
+    systemctl status coredns
+}
+
+# Create config for dns_script
+make_script_conf() {
+    cd dns_script
+    touch config.ini
+    cat >> config.ini << EOFCONFIGINI
+[database]
+ip = localhost
+username = dnssinkhole
+password = ${SQL_CLIENT_PASS}
+db = DomainServer
+
+[path]
+corefile = /etc/coredns/Corefile
+
+[dns]
+dns = 8.8.8.8:53
+EOFCONFIGINI
+    sed -i 's,config_dir=\"\",config_dir="'"${COREDNS_HOME}/dns_script"'",g' Config.py
+    cd ..
+}
+
+# Initialize Corefile
+init_corefile() {
+    cp -r -v dns_script ${COREDNS_HOME}
+    cd ${COREDNS_HOME}/dns_script
+    python3 Main.py 1
+    cd ..
+}
+
+# Implement Corefile update (crontab, etc.)
+update_corefile() {
+    sed -i 's,SCRIPTPATH=\$\"\",SCRIPTPATH=$"'"${COREDNS_HOME}/dns_script"'",g' ${COREDNS_HOME}/dns_script/CorefileUpdate.sh
+    (crontab -l && echo "0 3 0 0 0 cd ${COREDNS_HOME}/dns_script && ./CorefileUpdate.sh >> /var/log/coredns/coredns-update.log && cd") | crontab -
+}
+
+# Setup logging (syslog and json)
+setup_logging() {
+    # Enable module in rsyslog
+    sed -ie '/^#### MODULES ####/a module(load="mmjsonparse")' "${RSYSLOG_CONF}"
+    sed -ie '/^module(load="mmjsonparse")/i \# Module for parsing JSON file' "${RSYSLOG_CONF}"
+    # Copy template file
+    cp -v ryslog/coredns-template.conf ${RSYSLOG_D}
+    # Copy config file
+    cp -v rsyslog/coredns.conf ${RSYSLOG_D}
+    # Restart service
+    systemctl restart rsyslog
+    systemctl status rsyslog
+    systemctl restart coredns
+    systemctl status coredns
+    # Check in log directory
+    ls -lash ${COREDNS_LOG}
+}
+
+# Create installation log
+save_config(){
+    touch "${SINKHOLE_CONF}"
+    cat >> ${SINKHOLE_CONF} << EOFSINKHOLE
+script_by=longnv39@fis-csd
+platform=${PLATFORM}
+mysql_passwd=${MYSQL_PASSWORD}
+mysql_client_passwd=${SQL_CLIENT_PASSWORD}
+golang_ver=${GOLANG_VERSION}
+EOFSINKHOLE
+    chmod 400 ${SINKHOLE_CONF}
+}
+
+#################################################################################################
+
+install_py_libs
+disable_systemd_resolved
+setup_network_manager
+install_mysql
+init_db
+update_db
+install_go
+install_coredns
+make_script_conf
+init_corefile
+update_corefile
+setup_logging
+save_config

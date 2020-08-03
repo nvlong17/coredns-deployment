@@ -1,0 +1,144 @@
+#!/bin/bash
+set -e
+set -o errexit
+set -o nounset
+
+welcome() {
+    clear
+    echo "
+###############################################################################################
+#                                                                                             #
+#                     CoreDNS DNS Server and Sinkhole deployment for CentOS                   #
+#                                    Author: nvlong17                                         #
+#      ___                       ___                    ___           ___                     #
+#     /\__\                     /\__\                  /\__\         /\__\         _____      #
+#    /:/ _/_       ___         /:/ _/_                /:/  /        /:/ _/_       /::\  \     #
+#   /:/ /\__\     /\__\       /:/ /\  \              /:/  /        /:/ /\  \     /:/\:\  \    #
+#  /:/ /:/  /    /:/__/      /:/ /::\  \            /:/  /  ___   /:/ /::\  \   /:/  \:\__\   #
+# /:/_/:/  /    /::\  \     /:/_/:/\:\__\          /:/__/  /\__\ /:/_/:/\:\__\ /:/__/ \:|__|  #
+# \:\/:/  /     \/\:\  \__  \:\/:/ /:/  /          \:\  \ /:/  / \:\/:/ /:/  / \:\  \ /:/  /  #
+#  \::/__/         \:\/\__\  \::/ /:/  /            \:\  /:/  /   \::/ /:/  /   \:\  /:/  /   #
+#   \:\  \          \::/  /   \/_/:/  /              \:\/:/  /     \/_/:/  /     \:\/:/  /    #
+#    \:\__\         /:/  /      /:/  /                \::/  /        /:/  /       \::/  /     #
+#     \/__/         \/__/       \/__/                  \/__/         \/__/         \/__/      #
+#                                                                                             #
+###############################################################################################
+"
+    echo "Make sure you have configured a static IP for this server!"
+    echo "Starting script..."
+    sleep 3
+}
+
+#### Directories ####
+COREFILE_DIR="/etc/coredns"
+COREDNS_BIN="/usr/bin/coredns"
+
+#### Text Coloring ####
+RED='\033[0;31m'
+NC='\033[0m'
+
+#### Messages ####
+ROOT_ERR="Root privilege required. Please run the script with \"sudo\" for root"
+OS_ERR="This script only runs on \"CentOS 7\" and \"CentOS 8 \"!"
+NOT_ENOUGH_RAM="Minimum ram is not enough. Required: ${MIN_RAM}"
+COREDNS_EXISTS="This server already has CoreDNS in the system. Clean up if you want to install!"
+CANCEL_INSTALL="Setup is cancelling..."
+MISSING_SCRIPT="Missing required scripts. Starting download!"
+
+#### Variables ####
+SCRIPT_REPO="https://github.com/nvlong17/coredns-deployment"
+
+#### Condition checking ####
+# Check if user is not root
+check_root() {
+    if [[ "$(id -u)" != "0" ]]; then
+        printf "${RED}%s${NC}\n" "${ROOT_ERR}"
+        printf "${RED}%s${NC}\n" "${CANCEL_INSTALL}"
+        exit
+    fi
+}
+
+# Check if ram is equal or more than ram requirement
+check_min_ram() {
+    if [[ ${RAM_TOTAL} -lt ${MIN_RAM} ]]; then
+        printf "${RED}%s${NC}\n" "${RAM_NOT_ENOUGH}"
+        printf "${RED}%s${NC}\n" "${CANCEL_INSTALL}"
+        exit
+    fi
+}
+
+# Check if CoreDNS is previously installed
+check_coredns() {
+    if [[ -f ${COREDNS_BIN} || -f ${COREFILE_DIR} ]]; then
+        printf "${RED}%s${NC}\n" "${COREDNS_EXISTS}"
+        echo "Please remove directory ${COREFILE_DIR} and the binary ${COREDNS_BIN}!"
+        exit
+    fi
+}
+
+# Check if OS is CentOS
+check_os() {
+    if [ -f /etc/redhat-release ]; then
+        OS_VER=$(rpm -E %centos)
+    else
+        printf "${RED}${OS_WRONG}${NC}\n"
+        sleep 2
+        exit
+    fi
+}
+
+get_script() {
+    if [[ -f ../coredns-deployment ]]; then
+    else
+        echo "Downloading scripts for deployment..."
+        git clone "${SCRIPT_REPO}"
+        cd coredns-deployment
+    fi
+}
+
+# Check conditions before install
+check_before_install() {
+    echo ""
+    check_os()
+    check_root()
+    check_min_ram()
+    check_coredns()
+}
+
+#### Installation preparation ####
+# Remove old services
+remove_old_service() {
+    yum -y remove mysql* rsyslog* python3*
+    yum clean all
+}
+
+# Install required packages
+install_required_packages() {
+    yum -y update
+    yum -y install git curl wget vim python3 sed rsyslog cronie make python3-pip rsyslog-mmjsonparse
+    systemctl start rsyslog
+    systemctl enable rsyslog
+}
+
+# Set timezone
+set_timezone(){
+    if [[ -f "/etc/localtime" && -f "/usr/share/zoneinfo/Asia/Ho_Chi_Minh" ]]; then
+        rm -f /etc/localtime
+        ln -sf /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime
+    else
+        timedatectl set-timezone Asia/Ho_Chi_Minh
+    fi
+}
+
+prepare_install() {
+    set_timezone
+    remove_old_service
+    install_required_packages
+}
+
+welcome
+check_before_install
+prepare_install
+get_script
+chmod +x deploy
+./deploy
