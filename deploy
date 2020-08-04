@@ -68,6 +68,7 @@ NC='\033[0m'
 # Setup virtualenv
 setup_venv() {
     python3 -m venv ${VENV}
+    source ${VENV}/bin/activate
 }
 
 # Install requied Python libs
@@ -92,6 +93,8 @@ setup_network_manager() {
 # Install MySQL
 install_mysql() {
     yum install -y mysql-server
+    systemctl start mysqld
+    systemctl enable mysqld
     echo "Seting up MySQL Server with mysql_secure_installation"
     echo "MySQL root password (store somewhere safe): ${MYSQL_PASSWORD}"
     MYSQL=$(grep 'temporary password' /var/log/mysql/mysqld.log | awk '{print $13}')
@@ -100,30 +103,24 @@ install_mysql() {
     set timeout 10
     spawn mysql_secure_installation
 
-    expect "Press y\|Y for Yes, any other key for No:"
-    send "\r"
-
-    expect "New password:"
-    send "$MYSQL_PASSWORD\r"
-
-    expect "Re-enter new password:"
-    send "$MYSQL_PASSWORD\r"
-
-    expect "Remove anonymous users? \(Press y\|Y for Yes, any other key for No\) :"
-    send "y\r"
-
-    expect "Disallow root login remotely? \(Press y\|Y for Yes, any other key for No\) :"
-    send "y\r"
-
-    expect "Remove test database and access to it? \(Press y\|Y for Yes, any other key for No\) :"
-    send "y\r"
-
-    expect "Reload privilege tables now? \(Press y\|Y for Yes, any other key for No\) :"
-    send "y\r"
+    expect \"Press y\|Y for Yes, any other key for No:\"
+    send \"\r\"
+    expect \"New password:\"
+    send \"$MYSQL_PASSWORD\r\"
+    expect \"Re-enter new password:\"
+    send \"$MYSQL_PASSWORD\r\"
+    expect \"Remove anonymous users? \(Press y\|Y for Yes, any other key for No\) :\"
+    send \"y\r\"
+    expect \"Disallow root login remotely? \(Press y\|Y for Yes, any other key for No\) :\"
+    send \"y\r\"
+    expect \"Remove test database and access to it? \(Press y\|Y for Yes, any other key for No\) :\"
+    send \"y\r\"
+    expect \"Reload privilege tables now? \(Press y\|Y for Yes, any other key for No\) :\"
+    send \"y\r\"
     expect eof
     ")
 
-    echo "$SECURE_MYSQL"
+    echo "${SECURE_MYSQL}"
 }
 
 # DB initialization
@@ -241,14 +238,15 @@ EOFSINKHOLE
 disable_systemd_resolved
 setup_network_manager
 install_mysql
-init_db
-update_db
 install_go
 install_coredns
 make_script_conf
-install_py_libs
 setup_venv
+init_db
+update_db
+install_py_libs
 init_corefile
 update_corefile
+deactivate
 setup_logging
 save_config
