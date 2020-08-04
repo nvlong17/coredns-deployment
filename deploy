@@ -148,11 +148,7 @@ install_go() {
 
 # Install CoreDNS as a service
 install_coredns() {
-    echo "Downloading CoreDNS source code"
-    git clone https://github.com/coredns/coredns
-    echo "Compiling CoreDNS binaries"
     cd coredns
-    make
     cp -v coredns ${USR_BIN}
     cd ..
     cp -r -v zones ${COREDNS_ETC}
@@ -161,9 +157,6 @@ install_coredns() {
     cp -v coredns-sysusers.conf ${SYSUSERS}
     cp -v coredns-tmpfiles.conf ${TMPFILES}
     cd ..
-    systemctl status coredns
-    systemctl start coredns
-    systemctl enable coredns
     systemctl status coredns
 }
 
@@ -193,6 +186,9 @@ init_corefile() {
     cp -r -v dns_script ${COREDNS_HOME}
     cd ${COREDNS_HOME}/dns_script
     python3 Main.py 1
+    systemctl start coredns
+    systemctl enable coredns
+    systemctl status coredns
     cd ..
 }
 
