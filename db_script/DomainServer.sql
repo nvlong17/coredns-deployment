@@ -20,32 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `DomainServer`
 --
+CREATE DATABASE `DomainServer`;
 USE `DomainServer`;
-
--- --------------------------------------------------------
-
---
--- Create dnssinkhole and grant privileges
---
-
-
-CREATE USER 'dnssinkhole'@'%' IDENTIFIED BY 'password';
-GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES ON `DomainServer`.`coreDNS` TO `dnssinkhole`@`%`;
-
-
--- --------------------------------------------------------
-
---
--- Create addomain and grant privileges
---
-
-
-CREATE USER 'addomain'@'%' IDENTIFIED BY 'password';
-GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES ON `DomainServer`.`domains` TO `addomain`@`%`;
-GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES ON `DomainServer`.`whitelistDomains` TO `addomain`@`%`;
-
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `coreDNS`
@@ -53,7 +29,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES ON `DomainServer`.`whitelistDom
 
 CREATE TABLE `coreDNS` (
   `id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -64,7 +40,7 @@ CREATE TABLE `coreDNS` (
 CREATE TABLE `domains` (
   `domain` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 --
 -- Table structure for table `whitelistDomains`
@@ -72,7 +48,7 @@ CREATE TABLE `domains` (
 
 CREATE TABLE `whitelistDomains` (
   `domain` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 --
 -- Dumping data for table `whitelistDomains`
@@ -144,3 +120,28 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+-- --------------------------------------------------------
+
+--
+-- Create dnssinkhole and grant privileges
+--
+
+
+CREATE USER 'dnssinkhole'@'%' IDENTIFIED BY 'password';
+GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES ON `DomainServer`.`coreDNS` TO `dnssinkhole`@`%`;
+
+
+-- --------------------------------------------------------
+
+--
+-- Create addomain and grant privileges
+--
+
+
+CREATE USER 'addomain'@'%' IDENTIFIED BY 'password';
+GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES ON `DomainServer`.`domains` TO `addomain`@`%`;
+GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES ON `DomainServer`.`whitelistDomains` TO `addomain`@`%`;
+
+
+-- --------------------------------------------------------
