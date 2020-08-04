@@ -157,7 +157,6 @@ install_coredns() {
     cp -v coredns-sysusers.conf ${SYSUSERS}
     cp -v coredns-tmpfiles.conf ${TMPFILES}
     cd ..
-    systemctl status coredns
 }
 
 # Create config for dns_script
@@ -188,7 +187,6 @@ init_corefile() {
     python3 Main.py 1
     systemctl start coredns
     systemctl enable coredns
-    systemctl status coredns
     cd ..
 }
 
@@ -209,9 +207,7 @@ setup_logging() {
     cp -v rsyslog/coredns.conf ${RSYSLOG_D}
     # Restart service
     systemctl restart rsyslog
-    systemctl status rsyslog
     systemctl restart coredns
-    systemctl status coredns
     # Check in log directory
     ls -lash ${COREDNS_LOG}
 }
