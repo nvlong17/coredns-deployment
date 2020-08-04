@@ -73,7 +73,7 @@ setup_venv() {
 
 # Install requied Python libs
 install_py_libs() {
-    pip3 install -r --user requirements.txt
+    pip3 install -r requirements.txt
 }
 
 # Disable systemd-resolved
@@ -235,9 +235,9 @@ install_go
 install_coredns
 make_script_conf
 setup_venv
+install_py_libs
 init_db
 update_db
-install_py_libs
 init_corefile
 update_corefile
 deactivate
