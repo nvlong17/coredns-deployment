@@ -125,8 +125,8 @@ install_mysql() {
 
 # DB initialization
 init_db() {
-    sed -i 's/password/${SQL_CLIENT_PASS}/g' database/DomainServer.sql
-    mysql -u root -p${MYSQL_PASSWORD} DomainServer < database/DomainServer.sql
+    sed -i 's/password/${SQL_CLIENT_PASS}/g' db_script/DomainServer.sql
+    mysql -u root -p${MYSQL_PASSWORD} DomainServer < db_script/DomainServer.sql
 }
 
 # Implement DB update (crontab, etc.)
