@@ -14,7 +14,7 @@ class Ultility:
     def print_and_write_to_log(strings):
         for string in strings:
             print(string, end="")
-        file = open('logs/log_file.txt', "a")
+        file = open('/home/coredns/db_script/logs/log_file.log', "a")
         file.writelines(strings)
         file.close()
 

@@ -7,7 +7,7 @@ from Ultility import Ultility
 class TimeManager:
     def __init__(self, dateBegin):
         self.APITimeURL = "http://worldtimeapi.org/api/timezone/Asia/Ho_Chi_Minh"
-        self.lastUpdateTimeFile = "saved/LAST_TIME_UPDATE.txt"
+        self.lastUpdateTimeFile = "/home/coredns/db_script/saved/LAST_TIME_UPDATE.txt"
         #Check if user want to specify time
         if dateBegin is not None:
             self.time = dateBegin
