@@ -198,7 +198,7 @@ init_corefile() {
 # Implement Corefile update (crontab, etc.)
 update_corefile() {
     sed -i 's,SCRIPTPATH=\$\"\",SCRIPTPATH=$"'"${COREDNS_HOME}/dns_script"'",g' ${COREDNS_HOME}/dns_script/CorefileUpdate.sh
-    (crontab -l && echo "0 3 0 0 0 cd ${COREDNS_HOME}/dns_script && ./CorefileUpdate.sh >> /var/log/coredns/coredns-update.log && cd") | crontab -
+    (crontab -l && echo "0 3 * * * cd ${COREDNS_HOME}/dns_script && ./CorefileUpdate.sh >> /var/log/coredns/coredns-update.log && cd") | crontab -
 }
 
 # Setup logging (syslog and json)
