@@ -167,9 +167,8 @@ install_coredns() {
 
 # Create config for dns_script
 make_script_conf() {
-    cd dns_script
-    touch config.ini
-    cat >> config.ini << EOFCONFIGINI
+    touch dns_script/config.ini
+    cat >> dns_script/config.ini << EOFCONFIGINI
 [database]
 ip = localhost
 username = dnssinkhole
@@ -182,7 +181,7 @@ corefile = /etc/coredns/Corefile
 [dns]
 dns = 8.8.8.8:53
 EOFCONFIGINI
-    sed -i 's,config_dir=\"\",config_dir="'"${COREDNS_HOME}/dns_script/config.ini"'",g' Config.py
+    sed -i 's,config_dir=\"\",config_dir="'"${COREDNS_HOME}/dns_script/config.ini"'",g' dns_script/Config.py
     cd ..
 }
 
@@ -192,7 +191,6 @@ init_corefile() {
     python3 ${COREDNS_HOME}/dns_script/Main.py 1
     systemctl start coredns
     systemctl enable coredns
-    cd ..
 }
 
 # Implement Corefile update (crontab, etc.)
