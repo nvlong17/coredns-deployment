@@ -182,7 +182,6 @@ corefile = /etc/coredns/Corefile
 dns = 8.8.8.8:53
 EOFCONFIGINI
     sed -i 's,config_dir=\"\",config_dir="'"${COREDNS_HOME}/dns_script/config.ini"'",g' dns_script/Config.py
-    cd ..
 }
 
 # Initialize Corefile
