@@ -126,7 +126,7 @@ install_mysql() {
 # DB initialization
 init_db() {
     #mysql -u root -p${MYSQL_PASSWORD} -e "CREATE DATABASE DomainServer"
-    sed -i 's/password/${SQL_CLIENT_PASS}/g' db_script/DomainServer.sql
+    sed -i 's/password/'"${SQL_CLIENT_PASS}"'/g' db_script/DomainServer.sql
     mysql -u root -p${MYSQL_PASSWORD} < db_script/DomainServer.sql
 }
 
@@ -207,7 +207,7 @@ setup_logging() {
     sed -ie '/^#### MODULES ####/a module(load="mmjsonparse")' "${RSYSLOG_CONF}"
     sed -ie '/^module(load="mmjsonparse")/i \# Module for parsing JSON file' "${RSYSLOG_CONF}"
     # Copy template file
-    cp -v ryslog/coredns-template.conf ${RSYSLOG_D}
+    cp -v rsyslog/coredns-template.conf ${RSYSLOG_D}
     # Copy config file
     cp -v rsyslog/coredns.conf ${RSYSLOG_D}
     # Restart service
