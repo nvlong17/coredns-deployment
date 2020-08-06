@@ -222,7 +222,7 @@ save_config(){
 script_by=longnv39@fis-csd
 platform=${PLATFORM}
 mysql_passwd=${MYSQL_PASSWORD}
-mysql_client_passwd=${SQL_CLIENT_PASSWORD}
+mysql_client_passwd=${SQL_CLIENT_PASS}
 golang_ver=${GOLANG_VERSION}
 EOFSINKHOLE
     chmod 400 ${SINKHOLE_CONF} 
