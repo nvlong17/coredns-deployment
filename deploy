@@ -139,8 +139,13 @@ update_db() {
 }
 
 # Adding data to database
-finalize_db() {
-    python3 ${COREDNS_HOME}/db_script/Main.py > /dev/null 2>&1 & 
+finalize_setup() {
+    python3 ${COREDNS_HOME}/db_script/Main.py > /dev/null 2>&1 &
+    firewall-cmd --zone=public --permanent --add-port=53/tcp
+    firewall-cmd --zone=public --permanent --add-port=53/udp
+    firewall-cmd --zone=public --permanent --list-ports
+    firewall-cmd --zone=public --add-service=dns
+    firewall-cmd --reload
 }
 
 # Install Golang
