@@ -153,9 +153,9 @@ install_go() {
 
 # Install CoreDNS as a service
 install_coredns() {
-    git clone https://github.com/coredns/coredns
+    #git clone https://github.com/coredns/coredns
     cd coredns
-    make
+    #make
     cp -v coredns ${USR_BIN}
     cd ..
     mkdir -p ${COREDNS_ETC}/zones
