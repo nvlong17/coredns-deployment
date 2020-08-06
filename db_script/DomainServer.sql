@@ -161,5 +161,3 @@ GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES ON `DomainServer`.`whitelistDom
 -- --------------------------------------------------------
 
 FLUSH PRIVILEGES;
-
-INSERT INTO 
