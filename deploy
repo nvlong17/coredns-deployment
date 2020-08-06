@@ -254,4 +254,4 @@ init_corefile
 update_corefile
 setup_logging
 save_config
-finalize_db
+finalize_setup
