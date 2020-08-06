@@ -216,7 +216,7 @@ setup_logging() {
 
 # Create installation log
 save_config(){
-    mkdir /var/cloudfront.net
+    mkdir /var/sinkhole
     touch "${SINKHOLE_CONF}"
     cat >> ${SINKHOLE_CONF} << EOFSINKHOLE
 script_by=longnv39@fis-csd
