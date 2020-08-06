@@ -157,7 +157,7 @@ install_coredns() {
     cp -v coredns ${USR_BIN}
     cd ..
     mkdir -p ${COREDNS_ETC}/zones
-    cp -r -v zones ${COREDNS_ETC}/zones
+    cp -r -v zones ${COREDNS_ETC}
     cd systemd
     cp -v coredns.service ${SYSTEMD}
     cp -v coredns-sysusers.conf ${SYSUSERS}
