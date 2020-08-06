@@ -165,7 +165,6 @@ install_coredns() {
     cp -v coredns-sysusers.conf ${SYSUSERS}
     cp -v coredns-tmpfiles.conf ${TMPFILES}
     cd ..
-    chown
 }
 
 # Create config for dns_script
