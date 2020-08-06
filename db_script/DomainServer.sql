@@ -130,8 +130,8 @@ COMMIT;
 
 CREATE USER 'dnssinkhole'@'%' IDENTIFIED BY 'password';
 GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES ON `DomainServer`.`coreDNS` TO `dnssinkhole`@`%`;
-GRANT SELECT, UPDATE, REFERENCES ON `DomainServer`.`domains` TO `addomain`@`%`;
-GRANT SELECT, UPDATE, REFERENCES ON `DomainServer`.`whitelistDomains` TO `addomain`@`%`;
+GRANT SELECT, UPDATE, REFERENCES ON `DomainServer`.`domains` TO `dnssinkhole`@`%`;
+GRANT SELECT, UPDATE, REFERENCES ON `DomainServer`.`whitelistDomains` TO `dnssinkhole`@`%`;
 
 
 -- --------------------------------------------------------
