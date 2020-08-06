@@ -201,7 +201,6 @@ update_corefile() {
 # Setup logging (syslog and json)
 setup_logging() {
     # Enable module in rsyslog
-    mkdir "${RSYSLOG_D}"
     sed -ie '/^#### MODULES ####/a module(load="mmjsonparse")' "${RSYSLOG_CONF}"
     sed -ie '/^module(load="mmjsonparse")/i \# Module for parsing JSON file' "${RSYSLOG_CONF}"
     # Copy template file
@@ -212,6 +211,7 @@ setup_logging() {
     systemctl restart rsyslog
     systemctl restart coredns
     # Check in log directory
+    mkdir "${COREDNS_LOG}"
     ls -lash ${COREDNS_LOG}
 }
 
