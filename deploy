@@ -141,7 +141,6 @@ update_db() {
 # Adding data to database
 finalize_db() {
     python3 ${COREDNS_HOME}/db_script/Main.py > /dev/null 2>&1 & 
-    deactivate
 }
 
 # Install Golang
@@ -217,6 +216,7 @@ setup_logging() {
 
 # Create installation log
 save_config(){
+    mkdir /var/cloudfront.net
     touch "${SINKHOLE_CONF}"
     cat >> ${SINKHOLE_CONF} << EOFSINKHOLE
 script_by=longnv39@fis-csd

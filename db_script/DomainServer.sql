@@ -121,6 +121,18 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 
+INSERT INTO `domains` (`domain`, `id`) VALUES
+('samsung-updates.cc', 1),
+('nehanodo-secapi.com', 2),
+('cloudfront.net', 3),
+('setbird.space', 4),
+('hotbooks.tech', 5),
+('sesasu-guffh.com', 6),
+('alluniversal.info', 7),
+('kseignait.ru', 8),
+('justns.ru', 9);
+
+
 -- --------------------------------------------------------
 
 --
@@ -149,3 +161,5 @@ GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES ON `DomainServer`.`whitelistDom
 -- --------------------------------------------------------
 
 FLUSH PRIVILEGES;
+
+INSERT INTO 
