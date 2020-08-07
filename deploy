@@ -158,6 +158,7 @@ install_go() {
 
 # Install CoreDNS as a service
 install_coredns() {
+    useradd -m coredns
     #git clone https://github.com/coredns/coredns
     cd coredns
     #make
