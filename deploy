@@ -135,8 +135,7 @@ update_db() {
     cp -r -v db_script ${COREDNS_HOME}
     sed -i 's,DATABASE_USERNAME=\"root\",DATABASE_USERNAME=\"addomain\",g' ${COREDNS_HOME}/db_script/Main.py
     sed -i 's,DB_USER_PASSWORD=\"password\",DB_USER_PASSWORD="'"${SQL_CLIENT_PASS}"'",g' ${COREDNS_HOME}/db_script/Main.py
-    crontab -l
-    (crontab -l && echo "0 */4 * * * cd ${VENV} && source ./bin/activate && cd ${COREDNS_HOME}/db_script && python3 Main.py && deactivate && cd") | crontab -
+    (crontab -l 2>/dev/null ; echo "0 */4 * * * cd ${VENV} && source ./bin/activate && cd ${COREDNS_HOME}/db_script && python3 Main.py && deactivate && cd") | crontab -
 }
 
 # Adding data to database
@@ -204,7 +203,6 @@ init_corefile() {
 # Implement Corefile update (crontab, etc.)
 update_corefile() {
     sed -i 's,SCRIPTPATH=\$\"\",SCRIPTPATH=$"'"${COREDNS_HOME}/dns_script"'",g' ${COREDNS_HOME}/dns_script/CorefileUpdate.sh
-    crontab -l
     (crontab -l && echo "0 3 * * * cd ${COREDNS_HOME}/dns_script && ./CorefileUpdate.sh >> /var/log/coredns/coredns-update.log && cd") | crontab -
 }
 
