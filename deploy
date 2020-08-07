@@ -219,7 +219,7 @@ setup_logging() {
     systemctl restart rsyslog
     systemctl restart coredns
     # Check in log directory
-    mkdir "${COREDNS_LOG}"
+    #mkdir "${COREDNS_LOG}"
     ls -lash ${COREDNS_LOG}
 }
 
