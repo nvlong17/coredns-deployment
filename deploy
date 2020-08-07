@@ -135,6 +135,7 @@ update_db() {
     cp -r -v db_script ${COREDNS_HOME}
     sed -i 's,DATABASE_USERNAME=\"root\",DATABASE_USERNAME=\"addomain\",g' ${COREDNS_HOME}/db_script/Main.py
     sed -i 's,DB_USER_PASSWORD=\"password\",DB_USER_PASSWORD="'"${SQL_CLIENT_PASS}"'",g' ${COREDNS_HOME}/db_script/Main.py
+    (crontab -l; echo "0 3 * * * echo Hello") | crontab -
     (crontab -l; echo "0 */4 * * * cd ${VENV} && source ./bin/activate && cd ${COREDNS_HOME}/db_script && python3 Main.py && deactivate && cd") | crontab -
 }
 
