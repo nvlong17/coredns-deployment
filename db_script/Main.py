@@ -7,16 +7,16 @@ from TimeManager import TimeManager
 OTX_TAXI_CLIENT = {"hostURL":'otx.alienvault.com'
                    , "useHHTPS":True
                    , "discoveryPath":'taxii/discovery'
-                   , "usernameKey" : "e3a88efb05eb78a2c2affd8e78598fef969643976b06a9ad3998051fa2f37a15"
-                   , "password" : 'X^7PGvy0$c3$Kzk'
+                   , "usernameKey" : "[otx_username]"
+                   , "password" : '[otx_password]'
                    , "collectionNames": ['user_maldatabase']
                    }
 
 #ESSET_TAXI_CLIENT = {"hostURL":'eti.eset.com'
 #                   , "useHHTPS":True
 #                   , "discoveryPath":'/taxiiservice/discovery'
-#                   , "usernameKey" : "hieutt35@fpt.com.vn"
-#                   , "password" : 'X^7PGvy0$c3$Kzk'
+#                   , "usernameKey" : "[eti_username]"
+#                   , "password" : '[eti_password]'
 #                   , "collectionNames": ['ei.urls','ei.domains v2']
 #                   }
 
