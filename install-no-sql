@@ -120,9 +120,9 @@ remove_old_service() {
 # Install required packages
 install_required_packages() {
     yum -y update
-    yum -y install git curl wget vim python3 sed rsyslog cronie make python3-pip rsyslog-mmjsonparse expect bind-utils
-    systemctl start rsyslog
-    systemctl enable rsyslog
+    yum -y install git curl wget vim python3 sed rsyslog cronie make python3-pip rsyslog-mmjsonparse expect
+    # systemctl start rsyslog
+    # systemctl enable rsyslog
 }
 
 # Set timezone
@@ -137,7 +137,7 @@ set_timezone(){
 
 prepare_install() {
     set_timezone
-    remove_old_service
+    #remove_old_service
     install_required_packages
 }
 

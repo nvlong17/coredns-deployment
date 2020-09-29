@@ -39,8 +39,8 @@ esac
 
 #### Variables ####
 GO_PACKAGE="go$GOLANG_VERSION.$PLATFORM.tar.gz"
-MYSQL_PASSWORD=$(head -n 4096 /dev/urandom | tr -dc a-zA-Z0-9 | cut -b 1-20)
-SQL_CLIENT_PASS=$(head -n 4096 /dev/urandom | tr -dc a-zA-Z0-9 | cut -b 1-20)
+SQL_CLIENT_PASS=""
+SQL_IP=""
 
 #### Directories ####
 RESOLV="/etc/resolv.conf"
@@ -90,61 +90,20 @@ setup_network_manager() {
     systemctl restart NetworkManager
 }
 
-# Install MySQL
-install_mysql() {
-    yum install -y mysql-server
-    systemctl start mysqld
-    systemctl enable mysqld
-    echo "Seting up MySQL Server with mysql_secure_installation"
-    echo "MySQL root password (store somewhere safe): ${MYSQL_PASSWORD}"
-    MYSQL=$(grep 'temporary password' /var/log/mysql/mysqld.log | awk '{print $13}')
-
-    SECURE_MYSQL=$(expect -c "
-    set timeout 10
-    spawn mysql_secure_installation
-
-    expect \"Press y\|Y for Yes, any other key for No:\"
-    send \"\r\"
-    expect \"New password:\"
-    send \"$MYSQL_PASSWORD\r\"
-    expect \"Re-enter new password:\"
-    send \"$MYSQL_PASSWORD\r\"
-    expect \"Remove anonymous users? \(Press y\|Y for Yes, any other key for No\) :\"
-    send \"y\r\"
-    expect \"Disallow root login remotely? \(Press y\|Y for Yes, any other key for No\) :\"
-    send \"y\r\"
-    expect \"Remove test database and access to it? \(Press y\|Y for Yes, any other key for No\) :\"
-    send \"y\r\"
-    expect \"Reload privilege tables now? \(Press y\|Y for Yes, any other key for No\) :\"
-    send \"y\r\"
-    expect eof
-    ")
-
-    echo "${SECURE_MYSQL}"
-}
-
-# DB initialization
-init_db() {
-    #mysql -u root -p${MYSQL_PASSWORD} -e "CREATE DATABASE DomainServer"
-    sed -i 's/password/'"${SQL_CLIENT_PASS}"'/g' db_script/DomainServer.sql
-    mysql -u root -p${MYSQL_PASSWORD} < db_script/DomainServer.sql
-}
-
 # Implement DB update (crontab, etc.)
-update_db() {
-    cp -r -v db_script ${COREDNS_HOME}
-    sed -i 's,DATABASE_USERNAME=\"root\",DATABASE_USERNAME=\"addomain\",g' ${COREDNS_HOME}/db_script/Main.py
-    sed -i 's,DB_USER_PASSWORD=\"password\",DB_USER_PASSWORD="'"${SQL_CLIENT_PASS}"'",g' ${COREDNS_HOME}/db_script/Main.py
-    (crontab -l; echo "0 3 * * * echo Hello") | crontab -
-    (crontab -l; echo "0 */4 * * * cd ${VENV} && source ./bin/activate && cd ${COREDNS_HOME}/db_script && python3 Main.py && deactivate && cd") | crontab -
-}
+# update_db() {
+#     cp -r -v db_script ${COREDNS_HOME}
+#     sed -i 's,DATABASE_USERNAME=\"root\",DATABASE_USERNAME=\"addomain\",g' ${COREDNS_HOME}/db_script/Main.py
+#     sed -i 's,DB_USER_PASSWORD=\"password\",DB_USER_PASSWORD="'"${SQL_CLIENT_PASS}"'",g' ${COREDNS_HOME}/db_script/Main.py
+#     (crontab -l; echo "0 3 * * * echo Hello") | crontab -
+#     (crontab -l; echo "0 */4 * * * cd ${VENV} && source ./bin/activate && cd ${COREDNS_HOME}/db_script && python3 Main.py && deactivate && cd") | crontab -
+# }
 
 # Adding data to database
 finalize_setup() {
     python3 ${COREDNS_HOME}/db_script/Main.py > /dev/null 2>&1 &
     firewall-cmd --zone=public --permanent --add-port=53/tcp
     firewall-cmd --zone=public --permanent --add-port=53/udp
-    firewall-cmd --zone=public --permanent --add-port=3306/tcp
     firewall-cmd --zone=public --permanent --list-ports
     firewall-cmd --zone=public --add-service=dns
     firewall-cmd --reload
@@ -180,7 +139,7 @@ make_script_conf() {
     touch dns_script/config.ini
     cat >> dns_script/config.ini << EOFCONFIGINI
 [database]
-ip = localhost
+ip = ${SQL_IP}
 username = dnssinkhole
 password = ${SQL_CLIENT_PASS}
 db = DomainServer
@@ -245,14 +204,12 @@ EOFSINKHOLE
 
 disable_systemd_resolved
 setup_network_manager
-install_mysql
 install_go
 install_coredns
 make_script_conf
 setup_venv
 install_py_libs
-init_db
-update_db
+#update_db
 init_corefile
 update_corefile
 setup_logging
