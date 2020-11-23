@@ -3,9 +3,22 @@ from lxml import etree
 import re
 import tldextract
 import requests
+import dns.resolver
 
 
 class Ultility:
+    @staticmethod
+    def is_domain_resolveable(fqdn):
+        try:
+            dns.resolver.query(fqdn)
+            return True
+        except dns.resolver.NXDOMAIN:
+            return False
+        except dns.resolver.Timeout:
+            return False
+        except dns.exception.DNSException:
+            return False
+
     # Open a XML file
     @staticmethod
     def openXMLFile(filename):

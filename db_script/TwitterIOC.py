@@ -30,9 +30,12 @@ class TwitterIOC:
         blockOfXML = 0
         try:
             blockOfXML += 1
-            domains = []
             # Convert XML data to list of domains
-            domains = Ultility.get_domain_from_text(self.hostURL)
+            domains = [
+                domain
+                for domain in Ultility.get_domain_from_text(self.hostURL)
+                if Ultility.is_domain_resolveable(domain)
+            ]
             # Loop through each domain in the list
             (
                 numberOfDomains,
