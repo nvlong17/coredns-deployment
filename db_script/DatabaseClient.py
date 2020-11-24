@@ -1,5 +1,6 @@
 import mysql.connector
 import DatabaseClient
+from Ultility import Ultility
 
 
 class DatabaseConnect:
@@ -32,8 +33,11 @@ class DatabaseConnect:
             result = mycursor.fetchone()[0]
 
             # Check if in the white list database
-            checkSQL = """SELECT EXISTS(SELECT * from whitelistDomains WHERE domain LIKE (%s));"""
-            val = (insertDomain,)
+            checkSQL = """SELECT EXISTS(SELECT * from whitelistDomains WHERE domain LIKE (%.%s) or domain = %s);"""
+            val = (
+                Ultility.get_converted_domain(insertDomains),
+                Ultility.get_converted_domain(insertDomains),
+            )
             mycursor.execute(checkSQL, val)
             whiteDomain = mycursor.fetchone()[0]
 
