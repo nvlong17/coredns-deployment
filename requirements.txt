@@ -28,3 +28,4 @@ tldextract==2.2.2
 toml==0.10.1
 urllib3==1.25.9
 wrapt==1.12.1
+dnspython==2.0.0

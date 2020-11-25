@@ -2,21 +2,22 @@ import mysql.connector
 import DatabaseClient
 
 class DatabaseConnect:
-    def __init__(self, hostName, databaseUser, userPassword, databaseName, authPlugin):
+
+    def __init__ (self,hostName,databaseUser,userPassword,databaseName,authPlugin):
         self.host = hostName
         self.user = databaseUser
         self.passwd = userPassword
         self.database = databaseName
         self.authPlugin = authPlugin
 
-    # Load data to database
-    def load_to_database(self, insertDomains):
+    #Load data to database
+    def load_to_database(self,insertDomains):
         mydb = mysql.connector.connect(
-            host=self.host,
-            user=self.user,
-            passwd=self.passwd,
-            database=self.database,
-            auth_plugin=self.authPlugin,
+            host = self.host,
+            user = self.user,
+            passwd = self.passwd,
+            database = self.database,
+            auth_plugin = self.authPlugin
         )
 
         mycursor = mydb.cursor()
@@ -25,20 +26,18 @@ class DatabaseConnect:
         numberOfDuplicatedDomains = 0
 
         for insertDomain in insertDomains:
-            checkSQL = """SELECT EXISTS(SELECT * from domains WHERE domain = %s);"""
-            val = (insertDomain,)
-            mycursor.execute(checkSQL, val)
+            checkSQL="""SELECT EXISTS(SELECT * from domains WHERE domain LIKE (%s));"""
+            val=(insertDomain, )
+            mycursor.execute(checkSQL,val)
             result = mycursor.fetchone()[0]
-
-            # Check if in the white list database
-            checkSQL = """SELECT EXISTS(SELECT * from whitelistDomains WHERE (%s LIKE CONCAT('%.',whitelistDomains.domain)) OR (%s = whitelistDomains.domain));"""
-            val = (
-                insertDomains,insertDomains,
-            )
-            mycursor.execute(checkSQL, val)
+            
+            #Check if in the white list database
+            checkSQL="""SELECT EXISTS(SELECT * from whitelistDomains WHERE domain LIKE (%s));"""
+            val=(insertDomain, )
+            mycursor.execute(checkSQL,val)
             whiteDomain = mycursor.fetchone()[0]
 
-            if result == 0 and whiteDomain == 0:
+            if result==0 and whiteDomain==0:
                 sql = """INSERT INTO domains (domain) VALUES (%s)"""
                 val = (insertDomain,)
                 mycursor.execute(sql, val)
@@ -51,4 +50,4 @@ class DatabaseConnect:
         mycursor.close()
         mydb.close()
 
-        return numberOfInsertedDomains, numberOfDuplicatedDomains
+        return numberOfInsertedDomains,numberOfDuplicatedDomains
