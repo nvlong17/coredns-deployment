@@ -11,7 +11,7 @@ def get_all_domains():
     cursor = db.cursor()
 
     try:
-        sql = "SELECT * FROM domains"
+        sql = "SELECT domains.* FROM domains WHERE domain NOT IN(SELECT domain FROM whitelistDomains)"
         cursor.execute(sql)
         result = cursor.fetchall()
         return result
@@ -28,7 +28,7 @@ def get_latest_domain(id):
     cursor = db.cursor()
 
     try:
-        sql = "SELECT * FROM domains WHERE id > %s"
+        sql = "SELECT * FROM domains WHERE id > %s and domain NOT IN(SELECT domain FROM whitelistDomains)"
         val = (str(id),)
         cursor.execute(sql, val)
         result = cursor.fetchall()
@@ -46,7 +46,8 @@ def update_last_domain_id(id):
     cursor = db.cursor()
 
     try:
-        sql = "UPDATE coreDNS SET id = %s"
+        ### TODO: Change node id ###
+        sql = "UPDATE coreDNS SET id = %s where node = 0"
         val = (str(id),)
         cursor.execute(sql, val)
         db.commit()
@@ -63,11 +64,13 @@ def init_last_domain():
     cursor = db.cursor()
 
     try:
-        sql = "DELETE FROM coreDNS"
+        ### TODO: Change node id ###
+        sql = "DELETE FROM coreDNS WHERE node = 0"
         cursor.execute(sql)
         db.commit()
 
-        sql = "INSERT INTO coreDNS (id) VALUES (1)"
+        ### TODO: Change node id ###
+        sql = "INSERT INTO coreDNS (id, node) VALUES (1, 0)"
         cursor.execute(sql)
         db.commit()
     except Exception as e:
@@ -84,7 +87,8 @@ def get_last_domain_id():
     cursor = db.cursor()
 
     try:
-        sql = "SELECT * FROM coreDNS"
+        ### TODO: Change node id ###
+        sql = "SELECT * FROM coreDNS WHERE node = 3"
         cursor.execute(sql)
         result = cursor.fetchone()
         return result
